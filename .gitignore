@@ -1,0 +1,6 @@
+/build/
+/.xmake/
+/flash/EnhancedConsole.swf
+/deploy.sh
+/NEXUS_DESCRIPTION.txt
+*.zip
