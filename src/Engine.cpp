@@ -24,18 +24,6 @@ namespace eca::engine
 		Config g_config;
 		HistoryStore g_history;
 		std::size_t g_historyFileLines{ 0 };
-		using EditorIDMap = RE::BSTHashMap<RE::BSFixedString, RE::TESForm*>;
-		static_assert(sizeof(EditorIDMap) == 0x30);
-		constexpr REL::ID kInsertEditorID{ 13808 };
-
-		bool InsertEditorID(EditorIDMap* a_map, const RE::BSFixedString& a_editorID, RE::TESForm* a_form)
-		{
-			using func_t = bool (*)(void*, const RE::BSFixedString*, RE::TESForm* const*);
-			static REL::Relocation<func_t> func{ kInsertEditorID };
-			//the native insert function takes the scatter-table body after its 8-byte header.
-			auto* table = reinterpret_cast<std::byte*>(a_map) + 0x8;
-			return func(table, std::addressof(a_editorID), std::addressof(a_form));
-		}
 		int g_recallOffset{ 0 };
 		std::vector<CommandMeta> g_commands;
 		std::map<Domain, std::vector<RawCandidate>> g_harvested;
@@ -570,7 +558,7 @@ namespace eca::engine
 			if (map) {
 				RE::BSWriteLockGuard guard(lock);
 				for (const auto& entry : pending) {
-					if (InsertEditorID(map, entry.editorID, entry.form)) {
+					if (map->emplace(entry.editorID, entry.form).second) {
 						++inserted;
 					}
 				}
